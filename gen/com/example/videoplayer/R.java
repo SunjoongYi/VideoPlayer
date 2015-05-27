@@ -97,8 +97,8 @@ public final class R {
         public static final int LinearLayout8=0x7f06000d;
         public static final int LinearLayout9=0x7f06000f;
         public static final int List=0x7f06001a;
-        public static final int ListView_LinearLayout=0x7f060026;
-        public static final int List_LinearLayout=0x7f060027;
+        public static final int ListView_LinearLayout=0x7f060029;
+        public static final int List_LinearLayout=0x7f06002a;
         public static final int PhoneVideoList=0x7f06001b;
         public static final int RelativeLayout1=0x7f060005;
         public static final int RelativeLayout2=0x7f060019;
@@ -106,11 +106,14 @@ public final class R {
         public static final int RelativeLayout5=0x7f06001f;
         public static final int RelativeLayout6=0x7f060024;
         public static final int RelativeLayout7=0x7f060025;
+        public static final int SeekBar1=0x7f060027;
+        public static final int TimeText1=0x7f060026;
+        public static final int TimeText2=0x7f060028;
         public static final int VideoView1=0x7f060002;
-        public static final int imgIcon=0x7f060028;
-        public static final int runningTime=0x7f06002a;
-        public static final int txtSize=0x7f06002b;
-        public static final int txtTitle=0x7f060029;
+        public static final int imgIcon=0x7f06002b;
+        public static final int runningTime=0x7f06002d;
+        public static final int txtSize=0x7f06002e;
+        public static final int txtTitle=0x7f06002c;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
