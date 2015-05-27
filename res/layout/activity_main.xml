@@ -335,9 +335,10 @@
 					    	android:layout_height="wrap_content"
 							android:layout_weight="1">
 	            			<TextView
+	            			    android:id="@+id/MovieName"
 	            			    android:layout_width="wrap_content"
 	            			    android:layout_height="wrap_content"
-	            			    android:text="fwefwefewf"
+	            			    android:text="wef"
 	            			    android:textSize="30sp"
 	            			    android:textColor="#FFFFFFFF">
 	            			    
@@ -354,10 +355,11 @@
 	            			    android:layout_height="match_parent"
 	            			    android:layout_weight="3">
 								<TextView
+								    android:id="@+id/TimeText1"
 									android:gravity="end"							    
 								    android:layout_width="match_parent"
 								    android:layout_height="match_parent"
-								    android:text="asdf"
+								    android:text="0:00:00"
 								    android:textColor="#00bfff"
 								    android:textSize="25sp">
 								</TextView>
@@ -367,9 +369,12 @@
 	            			    android:layout_height="match_parent"
 	            			    android:layout_weight="1">
 								<SeekBar
+								    android:id="@+id/SeekBar1"
 								    android:layout_width="match_parent"
 								    android:layout_height="wrap_content"
-								    android:gravity="center_vertical">								    
+								    android:gravity="center_vertical"
+								    android:progress="1"
+								    >								    
 								</SeekBar>
 	            			</LinearLayout>
 	            			<LinearLayout
@@ -377,12 +382,13 @@
 	            			    android:layout_height="match_parent"
 	            			    android:layout_weight="3">
 								<TextView
+								    android:id="@+id/TimeText2"
 									android:gravity="start"
 								    android:layout_width="match_parent"
 								    android:layout_height="match_parent"
 								    android:textColor="#00bfff"
 								    android:textSize="25sp"									
-								    android:text="asdf"
+								    android:text="0:00:00"
 								    android:padding="2sp"
 								    android:layout_margin="2sp">
 								</TextView>	            			    
