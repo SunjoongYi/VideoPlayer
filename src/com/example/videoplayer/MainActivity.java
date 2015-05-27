@@ -1,12 +1,19 @@
 package com.example.videoplayer;
 
+import com.example.videoplayer.PlayService.MyBinder;
+import com.example.videoplayer.aidl.*;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,9 +25,11 @@ import android.widget.LinearLayout;
 import android.widget.VideoView;
 import android.widget.MediaController;
 import android.widget.Button;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -36,21 +45,29 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
-	private VideoView videoview;
-	private MediaController mc;
+
+	boolean mBound = false;
+	private String filename;
 	
-	private Button back_Button;
-	private Button home_Button;
-	private Button menu_Button;
-	private Button function_Button;
-	private Button setting_Button;
+	private static boolean isBackFromHomeKey = false;
+	private PlayService playservice;	// 액티비티가 백그라운드로 갈 때 소리를 재생시키는 서비스
+	private VideoView videoview;		//  
 	
-	private Button play_Button;
-	private Button ff_Button;
-	private Button rw_Button;
-	private Button list_Button;
+	private MediaController mc;			// 미디어 컨트롤러 (사용 X, 자체 UI 제작)
+	
+	private Button back_Button;			// BACK 버튼
+	private Button home_Button;			// HOME 버튼
+	private Button menu_Button;			// MENU 버튼
+	private Button function_Button;		// FUNCTION 버튼
+	private Button setting_Button;		// SETTING 버튼
+	
+	private Button play_Button;			// PLAY 버튼
+	private Button ff_Button;			// FF 버튼
+	private Button rw_Button;			// RW 버튼
+	private Button list_Button;			// 리스트 버튼
 	
 	private FrameLayout FrameLayout;
 	private LinearLayout LinearLayout;
@@ -72,15 +89,39 @@ public class MainActivity extends Activity {
 	String[] thumbColumns = {MediaStore.Video.Thumbnails.DATA,
 			MediaStore.Video.Thumbnails.VIDEO_ID };
 	
+	
+	//////////////////
+	private ServiceConnection serviceConnection = new ServiceConnection() {
+		
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			// TODO Auto-generated method stub
+			 
+			mBound = false;
+		}
+		
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			// TODO Auto-generated method stub
+			MyBinder binder = (MyBinder) service;
+			playservice = binder.getService();
+			mBound = true;
+		}
+	};
+
+	
 	//
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //setContentView(R.layout.listitem);
+
 
         //VideoView (videoview), MediaController (mc)객체 초기화
-        videoview = (VideoView)this.findViewById(R.id.VideoView1);
+        videoview = (VideoView)this.findViewById(R.id.VideoView1);//
+        videoview.setKeepScreenOn(true);
+        
+        //playservice.setVideoview((VideoView)this.findViewById(R.id.VideoView1));
         mc = new MediaController(this);
         
         //Flag 초기화
@@ -109,8 +150,10 @@ public class MainActivity extends Activity {
         	button_Array[i].requestFocus();
         }
         
-        videoview.setMediaController(null);
-
+        // 버튼 초기화 끝
+               
+                
+        // BACK 버튼 클릭시 이벤트
         back_Button.setOnClickListener(new OnClickListener(){
         	public void onClick(View v){
         		
@@ -142,16 +185,22 @@ public class MainActivity extends Activity {
         			}
         	}
         });
-
+        
+        
+        // PLAY 버튼 클릭시 이벤트
         play_Button.setOnClickListener(new OnClickListener(){
         	public void onClick(View v){
         		
         			play_Button.setSelected(true);
-        			play_Button.setPressed(true);        			
-        			videoview.start();
+        			play_Button.setPressed(true);
+        			
+        			//videoview.start();
+        			startService(new Intent(MainActivity.this, PlayService.class));
         	}
         });
         
+        
+        // LIST 버튼 클릭시 이벤트
         list_Button.setOnClickListener(new OnClickListener(){
         	public void onClick(View v){
         			list_Button.setSelected(true);
@@ -161,19 +210,19 @@ public class MainActivity extends Activity {
         	}
         });
         
-        //videoview 객체에 mc 객체 부착
+        //videoview 객체에 mc 객체 부착 -> 현재는 mc 를 이용하지 않으므로 매개변수에 null 대입
+        videoview.setMediaController(null);
         
         //내부 저장소의 위치를 얻어온다.        
         String folder = Environment.getExternalStorageDirectory().getAbsolutePath();
 
         //내부 저장소의 trailer.mp4 를 재생 파일로 지정
         videoview.setVideoPath(folder + "/trailer.mp4");
-
+        
         //포커스를 맞춘다.
         videoview.requestFocus();
         
         //비디오를 재생한다.
-            
         this.getWindow().getDecorView().
         setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
         
@@ -188,14 +237,6 @@ public class MainActivity extends Activity {
         LinearLayout.setMeasureWithLargestChildEnabled(true);
         LinearLayout.setVisibility(View.VISIBLE);      
     }
-    
-   
-	@Override
-	protected void onStop() {
-		// TODO Auto-generated method stub
-		super.onStop();
-		videoview.stopPlayback();
-	}
 	
 	@SuppressWarnings("deprecation")
 	private void init_phone_video_grid() {
@@ -223,7 +264,7 @@ public class MainActivity extends Activity {
 			video_column_index = videocursor
 					.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
 			videocursor.moveToPosition(position);
-			String filename = videocursor.getString(video_column_index);
+			filename  = videocursor.getString(video_column_index);
 			
 			/*
 			Intent intent = new Intent(VideoStoredInSDCard.this,
@@ -316,7 +357,6 @@ public class MainActivity extends Activity {
 
 				holder.runningTime.setText(time);
 				videocursor.moveToPosition(position);
-
 				
 				String[] proj = { MediaStore.Video.Media._ID,
 						MediaStore.Video.Media.DISPLAY_NAME,
@@ -345,6 +385,87 @@ public class MainActivity extends Activity {
 			return convertView;
 		}
 	}
+	
+    @Override
+    public void onRestart()
+    {
+        super.onRestart();
+         
+        if (isBackFromHomeKey)
+        {
+            Toast.makeText(this, "Home키로 부터 돌아옴", Toast.LENGTH_LONG).show();
+            isBackFromHomeKey = false;
+        }
+    }
+     
+    @Override	// 액티비티 -> onPause
+    public void onPause()
+    {
+    	videoview.pause();
+        int current_position = videoview.getCurrentPosition();
+        
+        /*
+        try {
+			playservice.mService.setAudio(filename, current_position);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+        videoview.stopPlayback();
+        
+        Intent intent = new Intent(this, PlayService.class);
+        intent.putExtra("currentTime", current_position);
+        intent.putExtra("path", filename);
+        startService(intent);
+        //bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+        super.onPause();
+    }
+     
+    @Override
+    public void onDestroy()
+    {
+    	videoview.pause();
+        int current_position = videoview.getCurrentPosition();
+        
+        /*
+        try {
+			playservice.mService.setAudio(filename, current_position);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+        videoview.stopPlayback();
+        
+        Intent intent = new Intent(this, PlayService.class);
+        intent.putExtra("currentTime", current_position);
+        intent.putExtra("path", filename);
+        startService(intent);
+        super.onDestroy();
+    }
+     
+    @Override
+    public void onStop()
+    {
+    	videoview.pause();
+        int current_position = videoview.getCurrentPosition();
+        
+        /*
+        try {
+			playservice.mService.setAudio(filename, current_position);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+        videoview.stopPlayback();
+        
+        Intent intent = new Intent(this, PlayService.class);
+        intent.putExtra("currentTime", current_position);
+        intent.putExtra("path", filename);
+        startService(intent);
+        super.onStop();
+		
+    }	
 
 	static class ViewHolder {
 		TextView txtTitle;
