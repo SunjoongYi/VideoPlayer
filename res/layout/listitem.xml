@@ -13,10 +13,12 @@
     	    android:layout_width="wrap_content"
     	    android:layout_height="wrap_content">
     	        <ImageView
-	       	android:id="@+id/imgIcon"
-        	android:layout_width="80dip"
-        	android:layout_height="75dip"
-        	/>"
+	       			android:id="@+id/imgIcon"
+        			android:layout_width="154dip"
+        			android:layout_height="97dip"
+        			android:layout_marginLeft="7dp"
+        			android:layout_marginTop="7dp"
+				/>
     	</LinearLayout>
     	
 
