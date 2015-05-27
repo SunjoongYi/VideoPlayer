@@ -4,25 +4,31 @@
     android:versionCode="1"
     android:versionName="1.0" >
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="19"
         android:targetSdkVersion="19" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>    
+	<uses-permission android:name="android.permission.READ_INTERNAL_STORAGE"/>
 		
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
         >
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name" 
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+			android:taskAffinity="">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".PlayService" android:enabled="true">
+                <action android:name="com.example.videoplayer"></action>
+        </service>
     </application>
 </manifest>
